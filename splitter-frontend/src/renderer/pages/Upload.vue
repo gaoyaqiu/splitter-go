@@ -1,81 +1,53 @@
 <template>
-   <div id="upload-view">
+  <div id="upload-view">
     <el-row :gutter="16">
-      <el-col :span="20" :offset="2">
+      <el-col :span="20"
+              :offset="2">
         <div class="view-title">
           文件上传
         </div>
-        <div
-          id="upload-area"
-          :class="{ 'is-dragover': dragover }"
-          @drop.prevent="onDrop"
-          @dragover.prevent="dragover = true"
-          @dragleave.prevent="dragover = false"
-        >
-          <div id="upload-dragger" @click="openUplodWindow">
+        <div id="upload-area"
+             :class="{ 'is-dragover': dragover }"
+             @drop.prevent="onDrop"
+             @dragover.prevent="dragover = true"
+             @dragleave.prevent="dragover = false">
+          <div id="upload-dragger"
+               @click="openUplodWindow">
             <i class="el-icon-upload"></i>
             <div class="upload-dragger__text">
               将文件拖到此处，或 <span>点击上传</span>
             </div>
-            <input type="file" id="file-uploader" @change="onChange" multiple>
+            <input type="file"
+                   id="file-uploader"
+                   @change="onChange"
+                   multiple>
           </div>
         </div>
-        <el-progress 
-          :percentage="progress" 
-          :show-text="false" 
-          class="upload-progress"
-          :class="{ 'show': showProgress }"
-          :status="showError ? 'exception' : 'text'" 
-        ></el-progress>
+        <el-progress :percentage="progress"
+                     :show-text="false"
+                     class="upload-progress"
+                     :class="{ 'show': showProgress }"
+                     :status="showError ? 'exception' : 'text'"></el-progress>
+        <div class="paste-style">
+          <div class="el-col-16">
+            <div class="paste-style__text">
+              一个文件N行
+            </div>
+          </div>
+        </div>
       </el-col>
     </el-row>
   </div>
 </template>
 <script>
+import { splitFile } from '@/utils/handleSplit'
 export default {
   name: 'upload',
   data () {
     return {
-      dragover: false,
-      progress: 0,
-      showProgress: false,
-      showError: false,
-      pasteStyle: '',
-      picBed: [],
-      picBedName: '',
-      menu: null
     }
   },
   mounted () {
-    this.$electron.ipcRenderer.on('uploadProgress', (event, progress) => {
-      if (progress !== -1) {
-        this.showProgress = true
-        this.progress = progress
-      } else {
-        this.progress = 100
-        this.showError = true
-      }
-    })
-    this.getPasteStyle()
-    this.getDefaultPicBed()
-    this.$electron.ipcRenderer.on('syncPicBed', () => {
-      this.getDefaultPicBed()
-    })
-    this.$electron.ipcRenderer.send('getPicBeds')
-    this.$electron.ipcRenderer.on('getPicBeds', this.getPicBeds)
-  },
-  watch: {
-    progress (val) {
-      if (val === 100) {
-        setTimeout(() => {
-          this.showProgress = false
-          this.showError = false
-        }, 1000)
-        setTimeout(() => {
-          this.progress = 0
-        }, 1200)
-      }
-    }
   },
   beforeDestroy () {
     this.$electron.ipcRenderer.removeAllListeners('uploadProgress')
@@ -83,9 +55,6 @@ export default {
     this.$electron.ipcRenderer.removeListener('getPicBeds', this.getPicBeds)
   },
   methods: {
-    onDrop (e) {
-      
-    },
     openUplodWindow () {
       document.getElementById('file-uploader').click()
     },
@@ -94,26 +63,16 @@ export default {
       document.getElementById('file-uploader').value = ''
     },
     ipcSendFiles (files) {
-      console.log(files)
-    },
-    getPasteStyle () {
-    },
-    handlePasteStyleChange (val) {
-     
-    },
-    uploadClipboardFiles () {
-    },
-    getDefaultPicBed () {
- 
-    },
-    getPicBeds (event, picBeds) {
-      
-    },
-    handleChangePicBed () {
-      
-    },
-    buildMenu () {
-      
+      let sendFiles = []
+      Array.from(files).forEach((item, index) => {
+        let obj = {
+          name: item.name,
+          path: item.path
+        }
+        sendFiles.push(obj)
+        splitFile(obj)
+      })
+      //this.$electron.ipcRenderer.send('uploadChoosedFiles', sendFiles)
     }
   }
 }
@@ -125,6 +84,7 @@ export default {
   text-align center
   margin 10px auto
 #upload-view
+  background transparentify(#172426, #000, 0.7)
   .view-title
     margin 20px auto
   #upload-area
@@ -136,11 +96,10 @@ export default {
     margin 0 auto
     color #dddddd
     cursor pointer
-    transition all .2s ease-in-out
+    transition all 0.2s ease-in-out
     #upload-dragger
       height 100%
-    &.is-dragover,
-    &:hover
+    &.is-dragover, &:hover
       border 2px dashed #A4D8FA
       background-color rgba(164, 216, 250, 0.3)
       color #fff
@@ -154,13 +113,13 @@ export default {
     display none
   .upload-progress
     opacity 0
-    transition all .2s ease-in-out
+    transition all 0.2s ease-in-out
     width 450px
     margin 20px auto 0
     &.show
       opacity 1
     .el-progress-bar__inner
-      transition all .2s ease-in-out
+      transition all 0.2s ease-in-out
   .paste-style
     text-align center
     margin-top 16px

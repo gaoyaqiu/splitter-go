@@ -2,11 +2,8 @@
 import {
   app,
   BrowserWindow,
-  ipcMain,
-  dialog
 } from 'electron'
-import pkg from '../../package.json'
-import splitterCoreIPC from './utils/splitterCoreIPC'
+
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
@@ -31,19 +28,12 @@ const createWindow = () => {
     height: 450,
     width: 800,
     show: true,
-    frame: true,
-    center: true,
+    center: false,
     fullscreenable: false,
     resizable: true, // 是否可以调整窗口大小。默认为true
     title: 'Splitter',
     vibrancy: 'ultra-dark', // 为窗口添加一个震动效果，仅在MacOS中有效
-    titleBarStyle: 'hidden',
-    webPreferences: {
-      backgroundThrottling: false,
-      nodeIntegration: true,
-      nodeIntegrationInWorker: true,
-      webSecurity: false
-    }
+    titleBarStyle: 'hidden'
   }
   if (process.platform !== 'darwin') {
     options.show = false
@@ -62,14 +52,8 @@ const createWindow = () => {
     }
   })
 
-  window.on('blur', () => {
-    window.hide()
-  })
   return window
 }
-
-splitterCoreIPC(app, ipcMain)
-
 
 app.on('ready', () => {
   createWindow()
