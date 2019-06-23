@@ -7,8 +7,8 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'upload',
-      component: require('@/pages/Upload').default
+      name: 'Index',
+      component: require('@/pages/Index').default
     },
     {
       path: '*',
